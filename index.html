@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ストップウォッチ</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/the-new-css-reset/css/reset.min.css"
+    />
+    <style>
+      body {
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        background: #eee;
+      }
+
+      .container {
+        margin: 20px auto;
+        width: 300px;
+        background: #fff;
+        padding: 15px;
+        text-align: center;
+      }
+
+      #timer {
+        padding: 20px;
+        background: #ddd;
+        font-size: 40px;
+        margin-bottom: 15px;
+      }
+
+      .btn {
+        padding: 10px;
+        background: #ddd;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .btn:hover {
+        background: #ccc;
+      }
+
+      .inactive {
+        opacity: 0.6;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="timer">00:00.000</div>
+      <div class="controls">
+        <button class="btn" id="start">Start</button>
+        <button class="btn" id="stop">Stop</button>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+    </div>
+
+    <script>
+      const timerEl = document.querySelector("#timer");
+      const startBtn = document.querySelector("#start");
+      const stopBtn = document.querySelector("#stop");
+      const resetBtn = document.querySelector("#reset");
+
+      //スタートした時の
+      let startTime = 0;
+      let elapsedTime = 0;
+      let timerId = null;
+
+      stopBtn.classList.add("inactive");
+      resetBtn.classList.add("inactive");
+
+      //経過時間を数える関数
+      const countUp = () => {
+        const d = new Date(Date.now() - startTime + elapsedTime);
+        const m = String(d.getMinutes()).padStart(2, "0");
+        const s = String(d.getSeconds()).padStart(2, "0");
+        const ms = String(d.getMilliseconds()).padStart(3, "0");
+        timerEl.textContent = `${m}:${s}.${ms}`;
+
+        timerId = setTimeout(() => {
+          countUp();
+        }, 10);
+      };
+
+      //「スタートボタン」にクリックイベントを登録する
+      startBtn.addEventListener("click", (e) => {
+        //スタートボタンがクリック無効の場合、何もしない
+        if (e.target.classList.contains("inactive")) return;
+
+        //経過時間を取得し、タイマーをスタートさせる
+        startTime = Date.now();
+        countUp();
+
+        //ボタンクリックの可・不可を設定する
+        startBtn.classList.add("inactive");
+        stopBtn.classList.remove("inactive");
+        resetBtn.classList.add("inactive");
+      });
+
+      //「ストップボタン」にクリックイベントを登録する
+      stopBtn.addEventListener("click", (e) => {
+        if (e.target.classList.contains("inactive")) return;
+
+        //経過時間を記録して、タイマーをクリアする
+        elapsedTime += Date.now() - startTime;
+        clearTimeout(timerId);
+
+        //ボタンクリックの可・不可を設定する
+        startBtn.classList.remove("inactive");
+        stopBtn.classList.add("inactive");
+        resetBtn.classList.remove("inactive");
+      });
+
+      //「リセットボタン」にクリックイベントを登録する
+      resetBtn.addEventListener("click", (e) => {
+        if (e.target.classList.contains("inactive")) return;
+
+        //それぞれの値を初期状態に戻す
+        elapsedTime = 0;
+        timerEl.textContent = "00:00.000";
+        clearTimeout(timerId);
+
+        //ボタンクリックの可・不可を設定する
+        startBtn.classList.remove("inactive");
+        stopBtn.classList.add("inactive");
+        resetBtn.classList.add("inactive");
+      });
+    </script>
+  </body>
+</html>
